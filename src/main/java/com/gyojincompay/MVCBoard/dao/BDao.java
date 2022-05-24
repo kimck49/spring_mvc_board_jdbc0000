@@ -23,7 +23,7 @@ import com.gyojincompay.MVCBoard.util.Constant;
 public class BDao {
 	
 	
-	DataSource dataSource;
+//	DataSource dataSource;
 	
 	JdbcTemplate template;
 	
@@ -33,13 +33,13 @@ public class BDao {
 		
 		this.template = Constant.template;
 		
-		try {
-			Context context = new InitialContext();
-			dataSource = (DataSource) context.lookup("java:comp/env/jdbc/Oracle11g");
-		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+//		try {
+//			Context context = new InitialContext();
+//			dataSource = (DataSource) context.lookup("java:comp/env/jdbc/Oracle11g");
+//		} catch (NamingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}	
 		
 	}
 	
@@ -262,198 +262,259 @@ public class BDao {
 		
 	}
 
-	public void delete(String bid) {
+	public void delete(final String bid) {
 		// TODO Auto-generated method stub
 		
-		Connection conn = null;
-		PreparedStatement pstmt = null;		
+		String query = "delete from mvc_board where bid=?";
 		
-		try {
-			conn = dataSource.getConnection();
-			String query = "delete from mvc_board where bid=?";
-			pstmt = conn.prepareStatement(query);			
+		this.template.update(query, new PreparedStatementSetter() {
 			
-			pstmt.setString(1, bid);
-			
-			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {				
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
+			@Override
+			public void setValues(PreparedStatement pstmt) throws SQLException {
+				// TODO Auto-generated method stub
+				pstmt.setString(1, bid);
 				
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
-		}	
+		});
+		
+//		Connection conn = null;
+//		PreparedStatement pstmt = null;		
+//		
+//		try {
+//			conn = dataSource.getConnection();
+//			String query = "delete from mvc_board where bid=?";
+//			pstmt = conn.prepareStatement(query);			
+//			
+//			pstmt.setString(1, bid);
+//			
+//			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {				
+//				if(pstmt != null) {
+//					pstmt.close();
+//				}
+//				if(conn != null) {
+//					conn.close();
+//				}
+//				
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}	
 		
 	}
 	
-	public void upHit(String bid) {
+	public void upHit(final String bid) {
 		
-		Connection conn = null;
-		PreparedStatement pstmt = null;		
+		String query = "UPDATE mvc_board SET bhit=bhit+1 WHERE bid=?";
 		
-		try {
-			conn = dataSource.getConnection();
-			String query = "UPDATE mvc_board SET bhit=bhit+1 WHERE bid=?";
-			pstmt = conn.prepareStatement(query);			
+		this.template.update(query, new PreparedStatementSetter() {
 			
-			pstmt.setString(1, bid);
-			
-			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {				
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
+			@Override
+			public void setValues(PreparedStatement pstmt) throws SQLException {
+				// TODO Auto-generated method stub
+				pstmt.setString(1, bid);
 				
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
-		}		
+		});
+		
+//		Connection conn = null;
+//		PreparedStatement pstmt = null;		
+//		
+//		try {
+//			conn = dataSource.getConnection();
+//			String query = "UPDATE mvc_board SET bhit=bhit+1 WHERE bid=?";
+//			pstmt = conn.prepareStatement(query);			
+//			
+//			pstmt.setString(1, bid);
+//			
+//			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {				
+//				if(pstmt != null) {
+//					pstmt.close();
+//				}
+//				if(conn != null) {
+//					conn.close();
+//				}
+//				
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}		
 		
 	}
 
 	public BDto reply_view(String cid) {
 		// TODO Auto-generated method stub
+		String query = "select * from mvc_board where bid = " + cid;
 		
-		BDto dto = null;
+		return template.queryForObject(query, new BeanPropertyRowMapper(BDto.class));
 		
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		
-		try {
-			conn = dataSource.getConnection();
-			String query = "select * from mvc_board where bid = ?";
-			pstmt = conn.prepareStatement(query);
-			pstmt.setString(1, cid);
-			//pstmt.setInt(1, Integer.parseInt(cid)); //bid 필드 값이 number인 경우 
-			
-			rs = pstmt.executeQuery();
-			
-			if(rs.next()) {
-				
-				 int bId = rs.getInt("bid");
-				 String bName = rs.getString("bname");
-				 String bTitle = rs.getString("btitle");
-				 String bContent = rs.getString("bcontent");
-				 Timestamp bDate = rs.getTimestamp("bdate");
-				 int bHit = rs.getInt("bhit");
-				 int bGroup = rs.getInt("bgroup");
-				 int bStep = rs.getInt("bstep");
-				 int bIndent = rs.getInt("bindent");
-				 
-				 dto = new BDto(bId, bName, bTitle, bContent, bDate, bHit, bGroup, bStep, bIndent);
-				 
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}		
-		
-		return dto;
+//		BDto dto = null;
+//		
+//		Connection conn = null;
+//		PreparedStatement pstmt = null;
+//		ResultSet rs = null;
+//		
+//		try {
+//			conn = dataSource.getConnection();
+//			String query = "select * from mvc_board where bid = ?";
+//			pstmt = conn.prepareStatement(query);
+//			pstmt.setString(1, cid);
+//			//pstmt.setInt(1, Integer.parseInt(cid)); //bid 필드 값이 number인 경우 
+//			
+//			rs = pstmt.executeQuery();
+//			
+//			if(rs.next()) {
+//				
+//				 int bId = rs.getInt("bid");
+//				 String bName = rs.getString("bname");
+//				 String bTitle = rs.getString("btitle");
+//				 String bContent = rs.getString("bcontent");
+//				 Timestamp bDate = rs.getTimestamp("bdate");
+//				 int bHit = rs.getInt("bhit");
+//				 int bGroup = rs.getInt("bgroup");
+//				 int bStep = rs.getInt("bstep");
+//				 int bIndent = rs.getInt("bindent");
+//				 
+//				 dto = new BDto(bId, bName, bTitle, bContent, bDate, bHit, bGroup, bStep, bIndent);
+//				 
+//			}
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				if(rs != null) {
+//					rs.close();
+//				}
+//				if(pstmt != null) {
+//					pstmt.close();
+//				}
+//				if(conn != null) {
+//					conn.close();
+//				}
+//				
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}		
+//		
+//		return dto;
 	}
 
-	public void reply(String bid, String bname, String btitle, String bcontent, String bgroup, String bstep,
-			String bindent) {
+	public void reply(final String bid, final String bname, final String btitle, final String bcontent, final String bgroup, final String bstep,
+			final String bindent) {
 		// TODO Auto-generated method stub
 		
-		replay_sort(bgroup, bstep);
+		reply_sort(bgroup, bstep);
 		
-		Connection conn = null;
-		PreparedStatement pstmt = null;		
-		
-		try {
-			conn = dataSource.getConnection();
-			String query = "INSERT INTO mvc_board(bid, bname, btitle, bcontent, bhit, bgroup, bstep, bindent) VALUES (mvc_board_seq.nextval, ?, ?, ?, 0, ?, ?, ?)";
-			pstmt = conn.prepareStatement(query);
+		this.template.update(new PreparedStatementCreator() {
 			
-			pstmt.setString(1, bname);
-			pstmt.setString(2, btitle);
-			pstmt.setString(3, bcontent);
-			pstmt.setInt(4, Integer.parseInt(bgroup));
-			pstmt.setInt(5, Integer.parseInt(bstep)+1);
-			pstmt.setInt(6, Integer.parseInt(bindent)+1);
-			
-			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {				
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				// TODO Auto-generated method stub
+				String query = "INSERT INTO mvc_board(bid, bname, btitle, bcontent, bhit, bgroup, bstep, bindent) VALUES (mvc_board_seq.nextval, ?, ?, ?, 0, ?, ?, ?)";
+				PreparedStatement pstmt = con.prepareStatement(query);
 				
-			} catch (Exception e) {
-				e.printStackTrace();
+				pstmt.setString(1, bname);
+				pstmt.setString(2, btitle);
+				pstmt.setString(3, bcontent);
+				pstmt.setInt(4, Integer.parseInt(bgroup));
+				pstmt.setInt(5, Integer.parseInt(bstep)+1);
+				pstmt.setInt(6, Integer.parseInt(bindent)+1);
+				
+				return pstmt;
 			}
-		}	
+		});
+		
+//		Connection conn = null;
+//		PreparedStatement pstmt = null;		
+//		
+//		try {
+//			conn = dataSource.getConnection();
+//			String query = "INSERT INTO mvc_board(bid, bname, btitle, bcontent, bhit, bgroup, bstep, bindent) VALUES (mvc_board_seq.nextval, ?, ?, ?, 0, ?, ?, ?)";
+//			pstmt = conn.prepareStatement(query);
+//			
+//			pstmt.setString(1, bname);
+//			pstmt.setString(2, btitle);
+//			pstmt.setString(3, bcontent);
+//			pstmt.setInt(4, Integer.parseInt(bgroup));
+//			pstmt.setInt(5, Integer.parseInt(bstep)+1);
+//			pstmt.setInt(6, Integer.parseInt(bindent)+1);
+//			
+//			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {				
+//				if(pstmt != null) {
+//					pstmt.close();
+//				}
+//				if(conn != null) {
+//					conn.close();
+//				}
+//				
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}	
 		
 	}
 	
-	public void replay_sort(String cgroup, String cstep) {
+	public void reply_sort(final String cgroup, final String cstep) {
 		
-		Connection conn = null;
-		PreparedStatement pstmt = null;		
+		String query = "UPDATE mvc_board SET bstep=bstep+1 WHERE bgroup=? and bstep>?";
 		
-		try {
-			conn = dataSource.getConnection();
-			String query = "UPDATE mvc_board SET bstep=bstep+1 WHERE bgroup=? and bstep>?";
-			pstmt = conn.prepareStatement(query);			
+		this.template.update(query, new PreparedStatementSetter() {
 			
-			pstmt.setString(1, cgroup);
-			pstmt.setString(2, cstep);
-			
-			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {				
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null) {
-					conn.close();
-				}
+			@Override
+			public void setValues(PreparedStatement pstmt) throws SQLException {
+				// TODO Auto-generated method stub
+				pstmt.setString(1, cgroup);
+				pstmt.setString(2, cstep);
 				
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
-		}		
+		});
+		
+		
+//		Connection conn = null;
+//		PreparedStatement pstmt = null;		
+//		
+//		try {
+//			conn = dataSource.getConnection();
+//			String query = "UPDATE mvc_board SET bstep=bstep+1 WHERE bgroup=? and bstep>?";
+//			pstmt = conn.prepareStatement(query);			
+//			
+//			pstmt.setString(1, cgroup);
+//			pstmt.setString(2, cstep);
+//			
+//			pstmt.executeUpdate();//데이터 삽입에 성공하면 1이 반환
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {				
+//				if(pstmt != null) {
+//					pstmt.close();
+//				}
+//				if(conn != null) {
+//					conn.close();
+//				}
+//				
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}		
 		
 	}
 	
